@@ -7,3 +7,4 @@ resultados
 ignorar
 *.log
 .vscode
+.venv
