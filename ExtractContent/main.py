@@ -1,12 +1,9 @@
-from extract_content_countries import ExtractContentFromWikipedia
-
+from links_bfs import LinksBFS
 
 def main():
-    extract = ExtractContentFromWikipedia()
     url = "https://en.wikipedia.org/wiki/United_States"
-    (_, a) = extract.request_maker(url)
-    print(a)
-        
+    LinksBFS(url, 2)
+
 if __name__ == "__main__":
     main()
     

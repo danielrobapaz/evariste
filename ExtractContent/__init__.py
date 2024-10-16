@@ -1,1 +1,1 @@
-from .extract_content_countries import *
+from .extract_content import *

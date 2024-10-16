@@ -8,3 +8,5 @@ ignorar
 *.log
 .vscode
 .venv
+*/__pycache__
+*.txt

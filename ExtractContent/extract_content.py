@@ -3,10 +3,12 @@ import pandas as pd
 from lxml import html
 from bs4 import BeautifulSoup
 import re
+import random
 
 TAGS = ['title', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a','span', 'label', 'li']
 TABLE_TAGS = ['tr', 'td', 'th', 'tbody']
 HEADER_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+BASE_DOMAIN = 'https://en.wikipedia.org'
 
 class ExtractContentFromWikipedia:
     def request_maker(self,
@@ -18,25 +20,23 @@ class ExtractContentFromWikipedia:
                 html = response.text
                 url = response.url
 
-                links = self.parse_links(html, url)
+                links = sorted(self.parse_links(html, url))[0:30]
                 text = self.extract_text(html, '//div[@id="bodyContent"]')
-                
                 return (links, text)
 
         except Exception as e:
             print(e)
-            print("Error making the request")
-
+            
     def parse_links(self, 
                     html: str,
                     page_url: str):
         soup = BeautifulSoup(html, 'html.parser')
         links = soup.find_all('a')
 
-        pattern = re.compile(r'^/wiki/(?!.*(?:Category|Wikipedia|Help|Portal|File)).*')
-        valid_links = [link for link in links if pattern.match(str(link.get('href')))]
+        pattern = re.compile(r'^/wiki/(?!.*(?:Category|Wikipedia|Help|Portal|File|Special)).*')
+        valid_links = [link.get('href') for link in links if pattern.match(str(link.get('href')))]
         
-        return set(valid_links)
+        return set([f'{BASE_DOMAIN}{link}' for link in valid_links])
 
     def extract_html(sefl,
                      url: str) -> str | None:
