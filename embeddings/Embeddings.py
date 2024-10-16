@@ -6,9 +6,9 @@ from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 
 class Embeddings:
     @staticmethod
-    def dividir_archivos(archivos: list[str],
-                        chunk_size:int = 512,
-                        chunk_overlap: int = 20) -> list[Document]:
+    def split_files(archivos: list[str],
+                    chunk_size:int = 512,
+                    chunk_overlap: int = 20) -> list[Document]:
         docs = []
         for archivo in archivos:
             loader = TextLoader(archivo)
@@ -20,20 +20,20 @@ class Embeddings:
         return docs
 
     @staticmethod
-    def crear_bd_faiss(docs:list[Document], 
-                    embeddings: HuggingFaceEmbeddings,
-                    folder_path: str,
-                    index_name: str):
+    def create_faiss_bd(docs:list[Document], 
+                        embeddings: HuggingFaceEmbeddings,
+                        folder_path: str,
+                        index_name: str):
         db = FAISS.from_documents(docs, embeddings)
         db.save_local(folder_path=folder_path, index_name=index_name)
 
         return db
 
     @staticmethod
-    def buscar_texto_relacionado(db: FAISS, 
-                                query: str,
-                                threshold: float,
-                                k: int) -> tuple[Document, float]:
+    def find_related_text(db: FAISS, 
+                          query: str,
+                          threshold: float,
+                          k: int) -> tuple[Document, float]:
         searchDocs = []
         
         for doc, score in db.similarity_search_with_score(query,k):
@@ -42,7 +42,7 @@ class Embeddings:
         
         return searchDocs
 
-    def cargar_embeddings(folder_path: str,
+    def load_embeddings(folder_path: str,
                         index_name: str,
                         embeddings: HuggingFaceEmbeddings):
         
