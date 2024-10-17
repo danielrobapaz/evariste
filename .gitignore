@@ -10,3 +10,5 @@ ignorar
 .venv
 */__pycache__
 *.txt
+*.fais
+*.pkl
