@@ -20,7 +20,7 @@ class ExtractContentFromWikipedia:
                 html = response.text
                 url = response.url
 
-                links = sorted(self.parse_links(html, url))[0:30]
+                links = self.parse_links(html, url)
                 text = self.extract_text(html, '//div[@id="bodyContent"]')
                 return (links, text)
 
