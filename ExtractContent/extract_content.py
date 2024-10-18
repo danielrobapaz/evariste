@@ -26,6 +26,7 @@ class ExtractContentFromWikipedia:
 
         except Exception as e:
             print(e)
+            return (set(), f"Could not get the HTML of the page {url}.")
             
     def parse_links(self, 
                     html: str,
