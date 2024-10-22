@@ -13,9 +13,9 @@ BASE_DOMAIN = 'https://en.wikipedia.org'
 class ExtractContentFromWikipedia:
     def request_maker(self,
                       url: str) -> None:
-        response = requests.get(url)
-
         try:
+            response = requests.get(url)
+
             if response.status_code == 200:
                 html = response.text
                 url = response.url
