@@ -20,8 +20,8 @@ def main():
     files_to_split = [f"../documents/{f}" for f in os.listdir("../documents")]
     splitted_files = Embeddings.split_files(files_to_split)
     
-    print("Creating embedding index...")
-    db = Embeddings.create_faiss_bd(splitted_files[:10], 
+    print(f"Creating embedding index...{len(splitted_files)} chunks")
+    db = Embeddings.create_faiss_bd(splitted_files, 
                                     embeddings_model, 
                                     "../embeddings_db", 
                                     "olympics_index")
