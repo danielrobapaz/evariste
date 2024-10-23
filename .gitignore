@@ -6,4 +6,11 @@ __pycache__
 resultados
 ignorar
 *.log
+<<<<<<< HEAD
 .vscode
+.venv
+*/__pycache__
+*.txt
+*.fais
+*.pkl
+embeddings_db
