@@ -6,7 +6,6 @@ __pycache__
 resultados
 ignorar
 *.log
-<<<<<<< HEAD
 .vscode
 .venv
 */__pycache__
