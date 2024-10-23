@@ -7,3 +7,9 @@ resultados
 ignorar
 *.log
 .vscode
+.venv
+*/__pycache__
+*.txt
+*.fais
+*.pkl
+embeddings_db
