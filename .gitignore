@@ -12,4 +12,4 @@ ignorar
 *.txt
 *.fais
 *.pkl
-embeddings_db
+embeddings_manager/embeddings_index

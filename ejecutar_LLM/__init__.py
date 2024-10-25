@@ -1,10 +1,13 @@
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
+from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
+
 from langchain_community.llms import Ollama
 from traduccion_sql_ln import *
-from parser_SQL import *
-from embeddings import *
+from sql_parser_manager import *
+from embeddings_manager import embeddings_manager
+
 import jellyfish
 import logging
 import mdpd
@@ -24,7 +27,7 @@ ejecuciones = 0
 # Configuración del modelo de embeding
 modelPath = EMBEDDINGS_MODEL
 
-model_kwargs = {'device':'cuda'}
+model_kwargs = {'device':'cpu'}
 
 encode_kwargs = {'normalize_embeddings': False}
 
@@ -34,7 +37,7 @@ embeddings = HuggingFaceEmbeddings(
     encode_kwargs=encode_kwargs # Pass the encoding options
 )
 
-db = cargar_embeddings(EMBEDDINGS_FOLDER, EMBEDDINGS_INDEX, embeddings)
+db = embeddings_manager.Embeddings.load_embeddings(EMBEDDINGS_FOLDER, EMBEDDINGS_INDEX, embeddings)
 
 # Configuración para el LLM
 retriever = db.as_retriever()

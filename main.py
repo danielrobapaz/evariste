@@ -5,7 +5,7 @@ import asyncio
 import warnings
 import pandas as pd
 from time import time
-from parser_SQL import *
+from sql_parser_manager import *
 from datetime import datetime
 from ejecutar_LLM import hacer_consulta, hacer_pregunta
 import ejecutar_LLM
