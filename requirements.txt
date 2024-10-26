@@ -32,6 +32,7 @@ ipython==8.22.1
 jedi==0.19.1
 jellyfish==1.1.0
 Jinja2==3.1.4
+jiter==0.6.1
 joblib==1.4.2
 jsonpatch==1.33
 jsonpointer==3.0.0
@@ -39,7 +40,8 @@ jupyter_client==8.6.0
 jupyter_core==5.7.1
 langchain==0.3.3
 langchain-community==0.3.2
-langchain-core==0.3.10
+langchain-core==0.3.13
+langchain-openai==0.2.3
 langchain-text-splitters==0.3.0
 langsmith==0.1.135
 lxml==5.3.0
@@ -67,7 +69,7 @@ nvidia-cusparse-cu12==12.1.0.106
 nvidia-nccl-cu12==2.20.5
 nvidia-nvjitlink-cu12==12.6.77
 nvidia-nvtx-cu12==12.1.105
-openai==1.12.0
+openai==1.52.2
 orjson==3.10.7
 packaging==23.2
 pandas==2.2.1
@@ -104,6 +106,7 @@ sqlglot==25.28.0
 sqlite_database==0.5.0
 stack-data==0.6.3
 sympy==1.13.3
+tabulate==0.9.0
 tbb==2021.13.1
 tenacity==8.2.3
 threadpoolctl==3.5.0
@@ -116,7 +119,7 @@ traitlets==5.14.1
 transformers==4.45.2
 triton==3.0.0
 typing-inspect==0.9.0
-typing_extensions==4.10.0
+typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.2.3
 wcwidth==0.2.13

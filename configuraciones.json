@@ -2,9 +2,9 @@
     "miniconsultas_status": ["En Espera", "Ejecutando", "Finalizado"],
     "miniconsultas_operaciones": ["except", "intersect", "union"],
     "miniconsultas_funciones_agregacion": ["avg", "count", "max", "min", "sum"],
-    "debug": true,
+    "debug": false,
     "EMBEDDINGS_MODEL": "thenlper/gte-small",
-    "EMBEDDINGS_FOLDER": "embeddings_db",
+    "EMBEDDINGS_FOLDER": "embeddings_manager/embeddings_index",
     "EMBEDDINGS_INDEX": "olympics_index"
 
 }

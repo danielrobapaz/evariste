@@ -3,6 +3,8 @@ from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 
+from langchain_openai import AzureChatOpenAI
+
 from langchain_community.llms import Ollama
 from traduccion_sql_ln import *
 from sql_parser_manager import *
@@ -42,14 +44,8 @@ db = embeddings_manager.Embeddings.load_embeddings(EMBEDDINGS_FOLDER, EMBEDDINGS
 # Configuración para el LLM
 retriever = db.as_retriever()
 
-ollama = Ollama(
-    base_url='http://localhost:3030',
-    # model="llama2-uncensored",
-    # model="llama3",
-    model="gemma:7b",
-    num_ctx=4096,
-    temperature = 0.3,
-    timeout = 1000 * 60 * 5
+ollama = AzureChatOpenAI(
+    deployment_name="gpt-35-turbo"
 )
 
 # Configuraciones para hacer las preguntas
