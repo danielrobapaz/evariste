@@ -1,4 +1,4 @@
-from embeddings_manager.embeddings_manager import Embeddings 
+from embeddings_manager import Embeddings 
 from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 import os
 

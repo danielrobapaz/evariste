@@ -1,4 +1,4 @@
-from scrapper_manager.extractor import ExtractContentFromWikipedia
+from extractor import ExtractContentFromWikipedia
 
 class LinksBFS:
     def __init__(self,

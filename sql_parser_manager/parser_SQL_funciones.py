@@ -952,7 +952,6 @@ def obtener_miniconsultas(consulta_sql: str) -> dict[str, list[miniconsulta_sql]
                 isinstance(condicion, Binary) and isinstance(condicion.args.get('expression'), Subquery)):
             return obtener_miniconsultas_anidadas(consulta_sql_ast)
 
-#
     # Caso donde la consulta es un select sin condicion IN
     if consulta_sql_ast.key == 'select':
         return obtener_miniconsultas_join(consulta_sql_ast)
@@ -1001,8 +1000,6 @@ def obtener_ejecutor(consulta_sql: str):
         --------
             El ejecutor necesario para combinar las miniconsultas
     """
-
-    print('hola')
 
     return obtener_miniconsultas(consulta_sql)['ejecutor']
 

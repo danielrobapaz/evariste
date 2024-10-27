@@ -32,6 +32,7 @@ def prueba_LLM():
     # consulta_sql= '''SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Code = T2.CountryCode WHERE T1.HeadOfState = "Beatrix" AND T2.IsOfficial = "T"'''
     consulta_sql = """select distinct t3.name from country as t1 join countrylanguage as t2 on  t2.countrycode = t1.code join city as t3 on  t3.countrycode = t1.code where t2.isofficial = 't' and t2.language = 'chinese' and t1.continent = 'asia'"""
     
+    
     lista_miniconsulta = obtener_lista_miniconsultas(consulta_sql)
 
     # print(lista_miniconsulta)
@@ -69,7 +70,23 @@ def prueba_singular():
     # consulta_sql = '''SELECT T1.Capital FROM Country as T1 WHERE T1.Name IN ( SELECT T2.Country_Name FROM Country_Language as T2 WHERE T2.Name = "English" and T2.IsOfficialLanguage = 'T' )'''
     # consulta_sql = '''SELECT MIN(T1.Population) FROM Country as T1 WHERE T1.Continent = "Europe"'''
     # consulta_sql = '''SELECT T2.Language FROM country AS T1 JOIN countrylanguage AS T2 ON T1.Name = T2.CountryName WHERE T1.HeadOfState = "Beatrix" AND T2.IsOfficial = "T"'''
-    consulta_sql = '''select t3.Name from Country as t1 join CountryLanguage as t2 on t1.Name = t2.CountryName join City as t3 on t1.Name = t3.CountryName where t2.IsOfficial = "T" and t2.Language = "chinese" and t1.Continent = "asia"'''
+    # consulta_sql = '''select t3.Name from Country as t1 join CountryLanguage as t2 on t1.Name = t2.CountryName join City as t3 on t1.Name = t3.CountryName where t2.IsOfficial = "T" and t2.Language = "chinese" and t1.Continent = "asia"'''
+    consulta_sql = """
+                    SELECT 
+	                    athlete.name,
+	                    athleteSponsor.name
+                    FROM olympicsGame as olympicsGame
+                    JOIN olympicsGameParticipant as olympicsGameParticipant
+                        ON olympicsGameParticipant.name = olympicsGame.name
+                    JOIN athlete as athlete
+	                    ON athlete.country = olympicsGameParticipant.contryName
+                    JOIN athleteSponsor as athleteSponsor
+                        ON athleteSponsor.athelteName = athlete.name
+                    WHERE olympicsGame.season = Summer 
+                        AND olympicsGame.year = '2016'
+                        AND olympicsGameParticipant.goldMedals >= 16
+    """.lower()
+
     ejecutor = obtener_ejecutor(consulta_sql)
     
     ejecutor.ejecutar()

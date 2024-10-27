@@ -3,7 +3,6 @@ import pandas as pd
 from lxml import html
 from bs4 import BeautifulSoup
 import re
-import random
 
 TAGS = ['title', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'a','span', 'label', 'li']
 TABLE_TAGS = ['tr', 'td', 'th', 'tbody']
