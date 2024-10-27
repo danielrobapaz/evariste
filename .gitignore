@@ -10,6 +10,5 @@ ignorar
 .venv
 */__pycache__
 *.txt
-*.fais
+*.faiss
 *.pkl
-embeddings_manager/embeddings_index/*
