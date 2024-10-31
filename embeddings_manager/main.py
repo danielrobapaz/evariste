@@ -23,7 +23,7 @@ def main():
     print(f"Creating embedding index...{len(splitted_files)} chunks")
     db = Embeddings.create_faiss_bd(splitted_files, 
                                     embeddings_model, 
-                                    "../embeddings_db", 
+                                    "./embeddings_index", 
                                     "olympics_index")
     
 if __name__ == "__main__":

@@ -64,13 +64,11 @@ prompt = ChatPromptTemplate.from_messages(
 
 def format_docs(docs):
     texto = "\n\n".join(doc.page_content for doc in docs)
-    # print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    # for doc in docs:
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    #     print(doc.metadata['source'])
-    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    #     print(doc.page_content)
-    # print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+    for doc in docs:
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(doc.metadata['source'])
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        print(doc.page_content)
     return texto
 
 def crear_instrucciones(columnas: list[str]):

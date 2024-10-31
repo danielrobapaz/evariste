@@ -74,18 +74,18 @@ def prueba_singular():
     consulta_sql = """
                     SELECT 
 	                    athlete.name,
-	                    athleteSponsor.name
+	                    sponsorOfAthletes.nameOfSponsor
                     FROM olympicsGame as olympicsGame
-                    JOIN olympicsGameParticipant as olympicsGameParticipant
-                        ON olympicsGameParticipant.name = olympicsGame.name
+                    JOIN olympicsGameCountry as olympicsGameCountry
+                        ON olympicsGameCountry.OlympicGameName = olympicsGame.name
                     JOIN athlete as athlete
-	                    ON athlete.country = olympicsGameParticipant.contryName
-                    JOIN athleteSponsor as athleteSponsor
-                        ON athleteSponsor.athelteName = athlete.name
+	                    ON athlete.country = olympicsGameCountry.contryName
+                    JOIN sponsorOfAthletes as sponsorOfAthletes
+                        ON sponsorOfAthletes.atheleteName = athlete.name
                     WHERE olympicsGame.season = Summer 
                         AND olympicsGame.year = '2016'
-                        AND olympicsGameParticipant.goldMedals >= 16
-    """.lower()
+                        AND olympicsGameCountry.goldMedalObtained >= 16
+    """
 
     ejecutor = obtener_ejecutor(consulta_sql)
     

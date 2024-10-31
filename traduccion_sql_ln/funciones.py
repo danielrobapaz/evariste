@@ -125,8 +125,12 @@ def traducir_miniconsulta_sql(consulta: miniconsulta_sql, tiene_dependencia: boo
     proyeccion: list[str] = traducir_proyecciones(consulta.proyecciones)
     tabla: str = consulta.tabla
     condicion: str = procesar_condiciones(consulta.condiciones)
-    return "Give me the " + ", ".join(proyeccion) + " of the " + tabla + (" where " + condicion  if condicion != "" else "") \
-        + (procesar_condiciones_join(consulta) if tiene_dependencia else "")
+
+
+    return f"""
+Give me the {", ".join(proyeccion)} of the {tabla} {"where " + condicion  if condicion != "" else ""}
+{procesar_condiciones_join(consulta) if tiene_dependencia else ""}
+    """
 
 def obtener_columnas_condicion_aux(condicion: Expression) -> list[str]:
     if condicion is None:
@@ -167,5 +171,16 @@ def traducir_miniconsulta_sql_anidada(consulta: miniconsulta_sql_anidadas) -> st
     tabla: str = list(consulta.tablas_aliases.values())[0]
     proyeccion: list[str] = traducir_proyecciones(consulta.proyecciones[list(consulta.tablas_aliases.keys())[0]])
     condicion: str = procesar_condiciones(consulta.condiciones)
-    return "Give me the " + ", ".join(proyeccion) + " of the " + tabla + (" where " + condicion  if condicion != "" else "") \
-        + (procesar_anidamientos(consulta.subconsultas) if consulta.subconsultas is not None else "")
+    return f"""
+Give me the "{", ".join(proyeccion)} of the {tabla} where  {condicion  if condicion != "" else ""}
+{procesar_anidamientos(consulta.subconsultas) if consulta.subconsultas is not None else ""}
+
+    """
+
+
+# Based on this schema:
+# olympicsgame (season, year, name) makes reference to the olympic games.
+# olympicsgamecountry (countryname, olympicgamename, goldmedalsobtained) makes reference to the countries that participated
+# in a specific olympic game and to the gold medals obtained in that olympic game.
+# athlete (name, country) makes reference to the athletes with the country they represent.
+# sponsorOfAthletes (athletename, sponsorname) makes reference to the sponsors of the athletes.
