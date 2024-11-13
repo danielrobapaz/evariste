@@ -8,12 +8,9 @@ import pandas as pd
 from sqlglot import Expression
 from typing import Optional, Union
 from sqlglot.expressions import In, Binary, Not, Subquery
+from sql_parser_manager.constants import ExecutionStatus, SetOperations, AggregationFunctions
 
 configuraciones = json.load(open("./configuraciones.json"))
-
-STATUS = configuraciones['miniconsultas_status']
-OPERACIONES_CONJUNTOS = configuraciones['miniconsultas_operaciones']
-FUNCIONES_AGREGACION = configuraciones['miniconsultas_funciones_agregacion']
 DEBUG = configuraciones['debug']
 
 
@@ -89,7 +86,7 @@ class miniconsulta_sql:
         self.condiciones = condiciones
         self.condiciones_join = condiciones_join
         self.dependencias = dependencias
-        self.status = STATUS[0]
+        self.status = ExecutionStatus.WAITING.name
         self.resultado = pd.DataFrame()
 
     def crear_prompt(self):
@@ -108,9 +105,9 @@ class miniconsulta_sql:
         from ejecutar_LLM import hacer_consulta
 
         async def procesar(consulta_procesar: miniconsulta_sql):
-            if consulta_procesar.status == STATUS[0]:
+            if consulta_procesar.status == ExecutionStatus.WAITING.name:
                 traduccion, proyecciones, lista_columnas_condiciones = consulta_procesar.crear_prompt()
-                consulta_procesar.status = STATUS[1]
+                consulta_procesar.status = ExecutionStatus.EXECUTING.name
                 columnas = proyecciones + \
                     [columna for columna in lista_columnas_condiciones if columna not in proyecciones]
                 # Traducción solo de la tabla
@@ -118,10 +115,10 @@ class miniconsulta_sql:
                 # Dado el resultado entonces se quiere todas las columnas que tengan las condiciones
                 
                 # Dado el resultado se quiere las columnas de la condicion de join
-                consulta_procesar.status = STATUS[2]
+                consulta_procesar.status = ExecutionStatus.FINISHED.name
 
-            elif consulta_procesar.status == STATUS[1]:
-                while consulta_procesar.status != STATUS[2]:
+            elif consulta_procesar.status == ExecutionStatus.EXECUTING.name:
+                while consulta_procesar.status != ExecutionStatus.FINISHED.name:
                     asyncio.sleep(5)
 
         if self.dependencias != None:
@@ -1004,7 +1001,7 @@ class miniconsulta_sql_anidadas:
         if DEBUG: logging.info(f"información sobre las subconsultas:\n {self.subconsultas}\n")
         
         traduccion, proyecciones, lista_columnas_condiciones = self.crear_prompt()
-        self.status = STATUS[1]
+        self.status = ExecutionStatus.EXECUTING.name
         columnas = proyecciones + \
             [columna for columna in lista_columnas_condiciones if columna not in proyecciones]
         asyncio.run(self._ejecutar_aux(traduccion, columnas))
@@ -1049,7 +1046,7 @@ class miniconsulta_sql_anidadas:
             
             if DEBUG:
                 logging.info(f"Tabla final:\n{self.resultado}\n")
-        self.status = STATUS[2]
+        self.status = ExecutionStatus.FINISHED.name
 
     def imprimir_datos(self, nivel: int) -> str:
         proyecciones_imprimir = []

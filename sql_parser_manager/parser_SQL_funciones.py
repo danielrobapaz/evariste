@@ -3,10 +3,7 @@ from typing import Any
 from .parser_SQL_clases import *
 from sqlglot import Expression, column, parse_one
 from sqlglot.expressions import In, Binary, Not, Subquery, Ordered
-
-configuraciones = json.load(open("./configuraciones.json"))
-OPERACIONES_CONJUNTOS = configuraciones['miniconsultas_operaciones']
-FUNCIONES_AGREGACION = configuraciones['miniconsultas_funciones_agregacion']
+from sql_parser_manager.constants import SetOperations, AggregationFunctions
 
 def obtener_tablas(consulta_sql_ast: Expression) -> tuple[list[str], dict[str, str]]:
     """
@@ -99,7 +96,7 @@ def obtener_proyecciones_agregaciones(consulta_sql_ast: Expression,
 
     for elemento_a_revisar in consulta_sql_ast.args['expressions']:
 
-        if elemento_a_revisar.key in FUNCIONES_AGREGACION:
+        if elemento_a_revisar.key in AggregationFunctions.choices():
             parametro_de_agregacion = elemento_a_revisar.this
 
             if (parametro_de_agregacion.key == 'column' and
@@ -902,7 +899,7 @@ def obtener_miniconsultas_operacion(consulta_sql_ast: Expression) -> dict[str, l
         Un diccionario con las miniconsultas que son dependientes (necesitan del 
         resultado de otra miniconsulta) y las independientes.
     """
-    if consulta_sql_ast.key not in OPERACIONES_CONJUNTOS:
+    if consulta_sql_ast.key not in SetOperations.choices():
         raise Exception(
             "Para ejecutar esta funcion la consulta SQL debe tener al menos una operacion")
 
@@ -939,7 +936,7 @@ def obtener_miniconsultas(consulta_sql: str) -> dict[str, list[miniconsulta_sql]
     consulta_sql_ast = parse_one(consulta_sql, dialect='postgres')
 
     # Caso donde la consulta es una operacion de conjuntos
-    if consulta_sql_ast.key in OPERACIONES_CONJUNTOS:
+    if consulta_sql_ast.key in SetOperations.choices():
         return obtener_miniconsultas_operacion(consulta_sql_ast)
 
     condiciones = obtener_condiciones_where(consulta_sql_ast)['condiciones']
