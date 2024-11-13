@@ -42,7 +42,7 @@ embeddings = HuggingFaceEmbeddings(
 db = embeddings_manager.Embeddings.load_embeddings(EMBEDDINGS_FOLDER, EMBEDDINGS_INDEX, embeddings)
 
 # Configuración para el LLM
-retriever = db.as_retriever()
+retriever = db.as_retriever(search_kwargs={"k":10})
 
 ollama = AzureChatOpenAI(
     deployment_name="gpt-35-turbo"
@@ -64,11 +64,11 @@ prompt = ChatPromptTemplate.from_messages(
 
 def format_docs(docs):
     texto = "\n\n".join(doc.page_content for doc in docs)
-    for doc in docs:
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print(doc.metadata['source'])
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        print(doc.page_content)
+    # for doc in docs:
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    #     print(doc.metadata['source'])
+    #     print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+    #     print(doc.page_content)
     return texto
 
 def crear_instrucciones(columnas: list[str]):

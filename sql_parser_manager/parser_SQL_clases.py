@@ -531,7 +531,7 @@ class join_miniconsultas_sql:
                 "$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
 
         self._juntar_resultados()
-
+        
         if self.limite > 0:
             if DEBUG:
                 logging.info("Tiene un limit, limitamos la tabla resultado\n")

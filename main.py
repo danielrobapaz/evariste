@@ -88,7 +88,6 @@ def prueba_singular():
     """
 
     ejecutor = obtener_ejecutor(consulta_sql)
-    
     ejecutor.ejecutar()
 
     print("Resultado final: ")
