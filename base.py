@@ -19,14 +19,22 @@ sql = """
                         AND olympicsGame.year = '2016'
                         AND olympicsGameCountry.goldMedalObtained >= 16
     """
-tiempos = []
+times = []
+sizes = {}
 
-while len(tiempos) < 20:
+while len(times) < 20:
     ejecutor = obtener_ejecutor(sql)
     start = time()
     ejecutor.ejecutar()
     end = time()
     if len(ejecutor.resultado) > 0:
-        tiempos.append(end-start)
+        
+        for miniconsulta in ejecutor.miniconsultas_independientes + ejecutor.miniconsultas_dependientes:
+            current = sizes.get(miniconsulta.tabla, [])
+            sizes[miniconsulta.tabla] = current + [len(miniconsulta.resultado)]
+        
+        current = sizes.get("total", [])
+        sizes["total"] = current + [len(ejecutor.resultado)]
+        times.append(end-start)
 
-print(tiempos)
+print(sizes)

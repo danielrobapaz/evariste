@@ -92,7 +92,6 @@ async def hacer_consulta(traduccion: str, columnas: list[str]):
     global ejecuciones
     
     columnas_traduccion = type(columnas)(columnas)
-    print("############################################################")
     print(f"Procesando la pregunta:\n\t{traduccion}")
     rag_chain = (
         {"context": retriever | format_docs, 
@@ -105,8 +104,6 @@ async def hacer_consulta(traduccion: str, columnas: list[str]):
     )
 
     resultado_limpio = rag_chain.invoke(traduccion)
-    print("Resultado sin procesar: ")
-    print(resultado_limpio)
         
     if DEBUG:  
         logging.warning(f"Procesando la petición: {traduccion}\n")
@@ -116,11 +113,7 @@ async def hacer_consulta(traduccion: str, columnas: list[str]):
         df = mdpd.from_md(resultado_limpio)
     except:
         df = pd.DataFrame()
-        
-    print(f"Columnas requeridas: {columnas}")
     
-    print("Resultado Antes de procesar: ")
-    print(df.to_markdown(index=False))
     if len(df) != 0:
         asignaciones = {}
         

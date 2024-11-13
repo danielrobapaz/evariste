@@ -79,9 +79,9 @@ condiciones_join = [
 
 
 
-tiempos = []
-
-while len(tiempos) < 20:
+times = []
+sizes = {}
+while len(times) < 20:
     miniconsultas_independientes = {
         'sponsorOfAthletes': miniconsulta_sql(
             tabla='sponsorOfAthletes',
@@ -186,6 +186,12 @@ while len(tiempos) < 20:
     consulta.ejecutar()
     end = time()
     if len(consulta.resultado) > 0:
-        tiempos.append(end-start)
+        for miniconsulta in consulta.miniconsultas_independientes + consulta.miniconsultas_dependientes:
+            current = sizes.get(miniconsulta.tabla, [])
+            sizes[miniconsulta.tabla] = current + [len(miniconsulta.resultado)]
+        
+        current = sizes.get("total", [])
+        sizes["total"] = current + [len(consulta.resultado)]
+        times.append(end-start)
 
-print(tiempos)
+print(times)
