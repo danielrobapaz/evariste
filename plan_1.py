@@ -133,7 +133,7 @@ while len(times) < 20:
             condiciones_join=[EQ(
                                 this=Column(
                                     this=Identifier(this='contryName', quoted=False),
-                                    table=Identifier(this='olympicsGameCountry', quoted=False)
+                                    table=Identifier(this='olympi csGameCountry', quoted=False)
                                 ),
                                 expression=Column(
                                     this=Identifier(this='country', quoted=False),
@@ -178,7 +178,7 @@ while len(times) < 20:
             dependencias=[miniconsultas_dependientes['olympicsGameCountry']]
         )
     consulta = join_miniconsultas_sql(
-        proyecciones=[],
+        proyecciones=projections,
         condiciones_join=[],
         miniconsultas_dependientes=list(miniconsultas_dependientes.values()),
         miniconsultas_independientes=list(miniconsultas_independientes.values()))
@@ -193,5 +193,7 @@ while len(times) < 20:
         current = sizes.get("total", [])
         sizes["total"] = current + [len(consulta.resultado)]
         times.append(end-start)
+        print(f'VAN {len(times)}')
 
+print(sizes)
 print(times)

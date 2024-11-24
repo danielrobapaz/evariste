@@ -38,3 +38,4 @@ while len(times) < 20:
         times.append(end-start)
 
 print(sizes)
+print(times)
