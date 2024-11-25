@@ -1,4 +1,4 @@
-from sql_parser_manager.execution_plan_nodes import Table, Node, Join
+from sql_parser_manager.execution_plan_nodes import Table, Node
 from sqlglot import parse_one, Expression
 
 class SQLParser:
@@ -14,7 +14,7 @@ class SQLParser:
         table_name: str = from_tables.this.this.this
         table_alias: str = from_tables.this.alias
 
-        ast_where_conditions: dict = self.get_where_conditions().get('condiciones', [])
+        ast_where_conditions: dict = self.get_where_conditions().get('conditions', [])
         
         where_condition: list[str] = [condition for condition in ast_where_conditions
                                       if condition.this.table == table_alias]
@@ -34,7 +34,7 @@ class SQLParser:
             table_name: str = join.this.this.this
             table_alias: str = join.this.alias
 
-            ast_where_conditions: dict = self.get_where_conditions().get('condiciones', [])
+            ast_where_conditions: dict = self.get_where_conditions().get('conditions', [])
             where_condition: list[str] = [condition for condition in ast_where_conditions
                                           if condition.this.table == table_alias]
 

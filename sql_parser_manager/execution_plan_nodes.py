@@ -46,8 +46,11 @@ class Table(Node):
         return [self.table_alias]
 
     def show_execution_plan(self):
-        print(f"Table: {self.table_alias}")
-        
+        print('Table')
+        print(self.table_alias)
+        print(f'Where: {self.where_condition}')
+        print('End Table')        
+
 class Join(Node):
     def __init__(self,
                  table1: Node,
@@ -62,6 +65,7 @@ class Join(Node):
         print(f"Join")
         self.table1.show_execution_plan()
         self.table2.show_execution_plan()
+        print(f"Join condition: {self.join_condition}")
         print(f"End join")
 
     def get_dependency_aliases(self):
