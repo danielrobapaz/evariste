@@ -1,4 +1,5 @@
 from enum import Enum
+from sqlglot import Expression
 
 class NodeType(Enum):
     SELECT = 'SELECT'
@@ -24,11 +25,9 @@ class Node:
 
 class Select(Node):
     def __init__(self,
-                 columns: list[str],
-                 from_table: Node):
+                 columns: list[Expression]):
         super().__init__(NodeType.SELECT)
-        self.columns: list[str] = columns
-        self.from_table: Node = from_table
+        self.columns: list[Expression] = columns
         
 class Table(Node):
     def __init__(self, 

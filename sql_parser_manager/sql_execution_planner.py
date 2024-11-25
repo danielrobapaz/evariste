@@ -1,5 +1,5 @@
 from sql_parser_manager.sql_parser import SQLParser
-from sql_parser_manager.execution_plan_nodes import Node, Join
+from sql_parser_manager.execution_plan_nodes import Node, Join, Select
 from sqlglot import Expression
 from sqlglot.expressions import EQ
 
@@ -9,7 +9,6 @@ class SQLExecutionPlanner(SQLParser):
         self.execution_plans: list[Node] = []
  
     def create_exeuction_plans(self) -> list[Node]:
-        join_conditions: list[Expression] = self.get_join_conditions()
         tables: dict[str, Node] = self.get_single_tables()
         total_tables: int = len(tables)
         
@@ -18,31 +17,20 @@ class SQLExecutionPlanner(SQLParser):
         for _ in range(total_tables - 1):
             new_plans = []
             for plan in current_plans:
-                dependency_aliases = plan.get_dependency_aliases()
-                tables_can_join = self.get_join_tables(dependency_aliases)
-                
-                missing_tables = [table_alias for table_alias in tables.keys() 
-                                  if table_alias not in dependency_aliases]
-                
-                possible_joins = [table for table in tables_can_join
-                                       if table in missing_tables]
-                
+                dependency_aliases = plan.get_dependency_aliases()  
+
+                possible_joins = self.get_posible_join(plan, tables)
                 
                 for join in possible_joins:
-                    posible_join_condition = [join_condition for join_condition in join_conditions
-                                              if (join_condition.this.table == join or join_condition.args.get('expression').table == join)]
+                    current_join_condition = self.get_join_condition(join, dependency_aliases)
                     
-                    condition_to_join = [join_condition for join_condition in posible_join_condition
-                                         if join_condition.this.table in dependency_aliases \
-                                            or join_condition.args.get('expression').table in dependency_aliases][0]
-                    
-                    if condition_to_join.this.table in dependency_aliases:
-                        join = Join(plan, tables[join], condition_to_join)
+                    if current_join_condition.this.table in dependency_aliases:
+                        join = Join(plan, tables[join], current_join_condition)
                     
                     else:
                         reversed_join_condition = EQ(
-                            this=condition_to_join.args.get('expression'),
-                            expression=condition_to_join.this
+                            this=current_join_condition.args.get('expression'),
+                            expression=current_join_condition.this
                         )
 
                         join = Join(plan, tables[join], reversed_join_condition)
@@ -51,6 +39,9 @@ class SQLExecutionPlanner(SQLParser):
 
             current_plans = new_plans
 
-        for plan in current_plans:
-             plan.show_execution_plan()
-             print('------------------')
+        self.execution_plans = current_plans
+
+    def show_execution_plans(self):
+        for plan in self.execution_plans:
+            plan.show_execution_plan()
+            print('-------')

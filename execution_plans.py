@@ -19,3 +19,4 @@ sql = """
 
 execution_planer = SQLExecutionPlanner(sql)
 execution_planer.create_exeuction_plans()
+execution_planer.show_execution_plans()

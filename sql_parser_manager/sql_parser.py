@@ -4,6 +4,7 @@ from sqlglot import parse_one, Expression
 class SQLParser:
     def __init__(self, sql: str):
         self.ast: Expression = parse_one(sql)
+        self.join_conditions = None
 
     def parse_from_tables(self) -> Table:
         from_tables: Expression = self.ast.args.get('from')
@@ -56,18 +57,15 @@ class SQLParser:
         while conectors != []:
             conector_actual = conectors.pop(0)
 
-            # Caso base
             if conector_actual.key != conector_type:
                 conditions.append(conector_actual)
                 break
 
-            # Revisamos la parte izquierda del and
             if conector_actual.this.key != conector_type:
                 conditions.append(conector_actual.this)
             else:
                 conectors.append(conector_actual.this)
 
-            # Agregamos la parte derecha del and
             if conector_actual.args['expression'].key != conector_type:
                 conditions.append(conector_actual.args['expression'])
 
@@ -92,6 +90,9 @@ class SQLParser:
         return {'conditions': conditions, 'conditions or': or_conditions}
 
     def get_join_conditions(self) -> list[Expression]:
+        if self.join_conditions:
+            return self.join_conditions
+        
         joins = self.ast.args.get('joins', [])
         
         join_conditions = []
@@ -102,6 +103,7 @@ class SQLParser:
             
             join_conditions.append(current_join_condition)
 
+        self.join_conditions = join_conditions
         return join_conditions
     
     def get_single_tables(self) -> dict[str, Node]:
@@ -130,3 +132,24 @@ class SQLParser:
 
         return [table for table in posible_joins
                 if table not in tables_aliases]
+    
+    def get_posible_join(self, table: Node, all_tables: dict[str, Node]) -> list[Node]:
+        dependency_aliases = table.get_dependency_aliases()
+        tables_can_join = self.get_join_tables(dependency_aliases)
+        missing_tables = [table_alias for table_alias in all_tables.keys() 
+                          if table_alias not in dependency_aliases]
+        
+        return [table for table in tables_can_join
+                if table in missing_tables]
+    
+    def get_join_condition(self, join: str, aliases: list[str]) -> Expression:
+        join_conditions = self.get_join_conditions()
+        posible_join_conditions = [join_condition for join_condition in join_conditions
+                                   if (join_condition.this.table == join or join_condition.args.get('expression').table == join)]
+        condition_to_join = [join_condition for join_condition in posible_join_conditions
+                              if join_condition.this.table in aliases \
+                                 or join_condition.args.get('expression').table in aliases][0]
+        
+        return condition_to_join
+    
+    def 
