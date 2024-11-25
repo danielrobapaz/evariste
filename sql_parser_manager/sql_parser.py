@@ -152,4 +152,5 @@ class SQLParser:
         
         return condition_to_join
     
-    def 
+    def get_select_expressions(self) -> list[Expression]:
+        return self.ast.args.get('expressions', [])

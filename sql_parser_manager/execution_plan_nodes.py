@@ -8,6 +8,7 @@ class NodeType(Enum):
     HAVING = 'HAVING'
     GROUP_BY = 'GROUP_BY'
 
+tab_character = '\t'
 
 class Node:
     def __init__(self, type: NodeType):
@@ -20,14 +21,25 @@ class Node:
     def get_dependency_aliases(self):
         raise NotImplementedError()
     
+    def show_execution_plan(self, deep: int):
+        raise NotImplementedError()
+    
     def __str__(self) -> str:
         return str(self.__dict__)
 
 class Select(Node):
     def __init__(self,
-                 columns: list[Expression]):
+                 columns: list[Expression],
+                 table: Node):
         super().__init__(NodeType.SELECT)
         self.columns: list[Expression] = columns
+        self.table: Node = table
+
+    def show_execution_plan(self, deep: int):
+        print(f'{tab_character*deep}Select')
+        print(f'{tab_character*deep}Columns: {self.columns}')
+        self.table.show_execution_plan(deep+1)
+        print(f'{tab_character*deep}End select')
         
 class Table(Node):
     def __init__(self, 
@@ -44,11 +56,11 @@ class Table(Node):
     def get_dependency_aliases(self) -> list[str]:
         return [self.table_alias]
 
-    def show_execution_plan(self):
-        print('Table')
-        print(self.table_alias)
-        print(f'Where: {self.where_condition}')
-        print('End Table')        
+    def show_execution_plan(self, deep: int):
+        print(f'{tab_character*deep}Table')
+        print(f'{tab_character*deep}self.table_alias')
+        print(f'{tab_character*deep}Where: {self.where_condition}')
+        print(f'{tab_character*deep}End Table')        
 
 class Join(Node):
     def __init__(self,
@@ -60,12 +72,12 @@ class Join(Node):
         self.table2: Table = table2
         self.join_condition: str = join_condition
 
-    def show_execution_plan(self):
-        print(f"Join")
-        self.table1.show_execution_plan()
-        self.table2.show_execution_plan()
-        print(f"Join condition: {self.join_condition}")
-        print(f"End join")
+    def show_execution_plan(self, deep: int):
+        print(f"{tab_character*deep}Join")
+        self.table1.show_execution_plan(deep+1)
+        self.table2.show_execution_plan(deep+1)
+        print(f"{tab_character*deep}Join condition: {self.join_condition}")
+        print(f"{tab_character*deep}End join")
 
     def get_dependency_aliases(self):
         return self.table1.get_dependency_aliases() + self.table2.get_dependency_aliases()

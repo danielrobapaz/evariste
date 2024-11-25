@@ -39,9 +39,15 @@ class SQLExecutionPlanner(SQLParser):
 
             current_plans = new_plans
 
+        select_condition = self.get_select_expressions()
+        
+        for i in range(len(current_plans)):
+            current_plans[i] = Select(select_condition, current_plans[i]) 
+
+        print(f'Total plans: {len(current_plans)}')
         self.execution_plans = current_plans
 
     def show_execution_plans(self):
         for plan in self.execution_plans:
-            plan.show_execution_plan()
+            plan.show_execution_plan(0)
             print('-------')
