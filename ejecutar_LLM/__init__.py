@@ -7,7 +7,7 @@ from langchain_openai import AzureChatOpenAI
 
 from langchain_community.llms import Ollama
 from traduccion_sql_ln import *
-from sql_parser_manager import *
+from sql_manager import *
 from embeddings_manager import embeddings_manager
 
 import jellyfish

@@ -1,5 +1,5 @@
-from sql_parser_manager.sql_parser import SQLParser
-from sql_parser_manager.execution_plan_nodes import Node, Join, Select
+from sql_manager.parser import SQLParser
+from sql_manager.execution_plan_nodes import Node, Join, Select
 from sqlglot import Expression
 from sqlglot.expressions import EQ
 

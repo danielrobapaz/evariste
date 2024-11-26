@@ -1,5 +1,6 @@
 from enum import Enum
 from sqlglot import Expression
+from sql_manager.executor import Executor
 
 class NodeType(Enum):
     SELECT = 'SELECT'
@@ -24,6 +25,9 @@ class Node:
     def show_execution_plan(self, deep: int):
         raise NotImplementedError()
     
+    def execute(self, executor: Executor):
+        raise NotImplementedError()
+
     def __str__(self) -> str:
         return str(self.__dict__)
 
@@ -52,13 +56,17 @@ class Table(Node):
         self.table_alias: str = table_alias
         self.where_condition: str = where_condition
         self.columns: list[str] = columns
+    
+    def execute(self, executor: Executor):
+        prompt = executor.create_prompt(self.where_condition)
+        self.result = executor.execute_prompt(prompt)
 
     def get_dependency_aliases(self) -> list[str]:
         return [self.table_alias]
 
     def show_execution_plan(self, deep: int):
         print(f'{tab_character*deep}Table')
-        print(f'{tab_character*deep}self.table_alias')
+        print(f'{tab_character*deep}Name:   {self.table_alias}')
         print(f'{tab_character*deep}Where: {self.where_condition}')
         print(f'{tab_character*deep}End Table')        
 

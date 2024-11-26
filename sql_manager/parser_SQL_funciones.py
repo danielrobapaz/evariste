@@ -3,7 +3,7 @@ from typing import Any
 from .parser_SQL_clases import *
 from sqlglot import Expression, column, parse_one
 from sqlglot.expressions import In, Binary, Not, Subquery, Ordered
-from sql_parser_manager.constants import SetOperations, AggregationFunctions
+from sql_manager.constants import SetOperations, AggregationFunctions
 
 def obtener_tablas(consulta_sql_ast: Expression) -> tuple[list[str], dict[str, str]]:
     """

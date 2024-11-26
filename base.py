@@ -1,5 +1,5 @@
-from sql_parser_manager.parser_SQL_clases import miniconsulta_sql, join_miniconsultas_sql
-from sql_parser_manager.parser_SQL_funciones import obtener_ejecutor
+from sql_manager.parser_SQL_clases import miniconsulta_sql, join_miniconsultas_sql
+from sql_manager.parser_SQL_funciones import obtener_ejecutor
 from sqlglot.expressions import Column, Identifier, EQ, GTE, Literal
 
 from time import time

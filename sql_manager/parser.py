@@ -1,4 +1,4 @@
-from sql_parser_manager.execution_plan_nodes import Table, Node
+from sql_manager.execution_plan_nodes import Table, Node
 from sqlglot import parse_one, Expression
 
 class SQLParser:

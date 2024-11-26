@@ -8,7 +8,7 @@ import pandas as pd
 from sqlglot import Expression
 from typing import Optional, Union
 from sqlglot.expressions import In, Binary, Not, Subquery
-from sql_parser_manager.constants import ExecutionStatus, SetOperations, AggregationFunctions
+from sql_manager.constants import ExecutionStatus, SetOperations, AggregationFunctions
 
 configuraciones = json.load(open("./configuraciones.json"))
 DEBUG = configuraciones['debug']

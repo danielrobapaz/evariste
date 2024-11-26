@@ -4,7 +4,7 @@ import pandas as pd
 
 from sqlglot import Expression
 from sqlglot.expressions import Paren, Column, Literal
-from sql_parser_manager.parser_SQL_clases import *
+from sql_manager.parser_SQL_clases import *
 
 def obtener_operador(operacion: str, reverso: bool = False) -> str:
     match operacion:

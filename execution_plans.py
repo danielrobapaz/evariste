@@ -1,4 +1,4 @@
-from sql_parser_manager.sql_execution_planner import SQLExecutionPlanner
+from sql_manager.execution_planner import SQLExecutionPlanner
 
 sql = """
                     SELECT 
