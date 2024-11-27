@@ -1,5 +1,5 @@
 from sql_manager.execution_planner import SQLExecutionPlanner
-
+from sql_manager.executor import Executor
 sql = """
                     SELECT 
 	                    athlete.name,
@@ -19,4 +19,6 @@ sql = """
 
 execution_planer = SQLExecutionPlanner(sql)
 execution_planer.create_exeuction_plans()
-execution_planer.show_execution_plans()
+
+plan = execution_planer.execution_plans[0]
+plan.execute(Executor())

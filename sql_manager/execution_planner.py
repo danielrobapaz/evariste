@@ -1,6 +1,5 @@
 from sql_manager.parser import SQLParser
 from sql_manager.execution_plan_nodes import Node, Join, Select
-from sqlglot import Expression
 from sqlglot.expressions import EQ
 
 class SQLExecutionPlanner(SQLParser):

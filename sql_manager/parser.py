@@ -1,11 +1,35 @@
 from sql_manager.execution_plan_nodes import Table, Node
 from sqlglot import parse_one, Expression
+from sqlglot.expressions import Column, Identifier
 
 class SQLParser:
     def __init__(self, sql: str):
         self.ast: Expression = parse_one(sql)
         self.join_conditions = None
+        
+    def __get_all_columns(self, table_alias: str) -> list[Expression]:
+        ast_select_expressions = self.ast.args.get('expressions', [])
+        ast_join_expressions = self.get_join_conditions()
+        
+        columns: list[str] = [column for column in ast_select_expressions
+                              if column.table == table_alias] 
+        
+        get_join = lambda join: join.this.this.this if join.this.table == table_alias else join.args.get('expression').this.this
+        
+        columns += [
+            Column(
+                this=Identifier(this=get_join(join),
+                                quoted=False),
+                table=Identifier(this=table_alias, 
+                                 quoted=False)
+            )
 
+            for join in ast_join_expressions
+            if join.this.table == table_alias or join.args.get('expression').table == table_alias
+        ]
+        
+        return columns
+    
     def parse_from_tables(self) -> Table:
         from_tables: Expression = self.ast.args.get('from')
 
@@ -20,9 +44,7 @@ class SQLParser:
         where_condition: list[str] = [condition for condition in ast_where_conditions
                                       if condition.this.table == table_alias]
 
-        ast_select_expressions = self.ast.args.get('expressions', [])
-        columns: list[str] = [column for column in ast_select_expressions
-                              if column.table == table_alias]
+        columns: list[Expression] = self.__get_all_columns(table_alias)
 
         return Table(table_name, table_alias, where_condition, columns)
     
@@ -39,10 +61,7 @@ class SQLParser:
             where_condition: list[str] = [condition for condition in ast_where_conditions
                                           if condition.this.table == table_alias]
 
-            ast_select_expressions = join.args.get('expressions', [])
-            columns: list[str] = [column for column in ast_select_expressions
-                                  if column.table == table_alias] 
-
+            columns: list[Expression] = self.__get_all_columns(table_alias) 
             join_tables.append(Table(table_name, table_alias, where_condition, columns))
 
         return join_tables
@@ -97,7 +116,7 @@ class SQLParser:
         
         join_conditions = []
         for join in joins:
-            current_join_condition = join.args.get('on', None)
+            current_join_condition = join.args.get('on')
             if not current_join_condition:
                 raise Exception("No JOIN condition")
             
