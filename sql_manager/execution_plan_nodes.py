@@ -1,6 +1,7 @@
 from enum import Enum
 from sqlglot import Expression
 from sql_manager.executor import Executor
+import pandas as pd
 
 class NodeType(Enum):
     SELECT = 'SELECT'
@@ -27,7 +28,7 @@ tab_character = '\t'
 class Node:
     def __init__(self, type: NodeType):
         self.type: NodeType = type
-        self.result: any = None
+        self.result: pd.DataFrame = pd.DataFrame()
 
     def execute(self):
         raise NotImplementedError()
@@ -61,6 +62,7 @@ class Select(Node):
     def execute(self, executor: Executor):
         print('Select')
         self.table.execute(executor)
+        self.result = self.table.result
 
 class Table(Node):
     def __init__(self, 
@@ -74,13 +76,13 @@ class Table(Node):
         self.where_condition: list[Expression] = where_condition
         self.columns: list[Expression] = columns
     
-    def __translate_columns(self):
+    def __translate_columns(self) -> list[str]:
         columns: str = set()
 
         for column in self.columns:
             columns.add(column.args.get('this').args.get('this'))
 
-        return ', '.join(list(columns))
+        return list(columns)
 
     def __translate_where(self):
         where: list[str] = []
@@ -113,8 +115,11 @@ class Table(Node):
                                         where,
                                         join_condition)
         
-        self.result = executor.execute_prompt(prompt)
-
+        self.result = executor.execute_prompt(prompt, columns)
+        
+        print(prompt)
+        print(self.result)
+        print('\n')
     def get_dependency_aliases(self) -> list[str]:
         return [self.table_alias]
 
@@ -128,7 +133,7 @@ class Join(Node):
     def __init__(self,
                  table1: Node,
                  table2: Node,
-                 join_condition: str):
+                 join_condition: Expression):
         super().__init__(NodeType.JOIN)
         self.table1: Table = table1
         self.table2: Table = table2
@@ -144,7 +149,21 @@ class Join(Node):
     def get_dependency_aliases(self):
         return self.table1.get_dependency_aliases() + self.table2.get_dependency_aliases()
 
+    def __translate_join_condition(self):
+        translate_join: str = ""
+
+        left_column = self.join_condition.this.this.this
+        right_column = self.join_condition.args.get("expression").this
+
+        if len(self.table1.result) > 0:
+            foreign_values = self.table1.result[left_column].to_list()
+
+            translate_join += f" where {right_column} in ({', '.join(foreign_values)})"
+
+        return None if translate_join == "" else translate_join
+    
     def execute(self, executor: Executor):
-        print('Join')
         self.table1.execute(executor)
-        self.table2.execute(executor)
+        join_condition = self.__translate_join_condition()
+        self.table2.execute(executor, join_condition)
+        self.result = self.table2.result

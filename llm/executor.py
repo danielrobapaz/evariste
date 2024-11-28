@@ -24,7 +24,7 @@ class LLMExecutor:
         return db.as_retriever(search_kwargs={"k": 10})
 
     def __get_base_prompt(self):
-        system_prompt = (
+        system_prompt=(
             "You are a highly intelligent question answering bot. "
             "You will answer concisely. "
             "Use only the given context to answer the question. "
@@ -34,7 +34,7 @@ class LLMExecutor:
 
         prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", system_prompt)
+                ("system", system_prompt),
                 ("human", "In the next Markdown table there are the answer ofthe query: {question}")
             ]
         )
@@ -59,15 +59,13 @@ class LLMExecutor:
         text += 'If I ask you a question that is rooted in truth, you will give you the answer.\n'
         text += 'If I ask you a question that is nonsense, trickery, or has no clear answer, you will respond with "Unknown". '
         
-        return text
+        return (lambda *args: text)
 
     def invoke(self, prompt: str, columns: list[str]):
         self.executions += 1
         
         columns_translation = type(columns)(columns)
-        
-        print(f'Processing the question:\n\t{prompt}')
-        
+
         rag_chain = (
             {'context': self.retriever | self.__format_docs, 
             'question': RunnablePassthrough(),

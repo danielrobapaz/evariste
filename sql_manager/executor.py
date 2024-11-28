@@ -2,15 +2,23 @@ from llm.executor import LLMExecutor
 import pandas as pd
 import mdpd
 import jellyfish
+from langchain_openai import AzureChatOpenAI
 
 class Executor:
+    def __init__(self) -> None:
+        self.model: LLMExecutor = LLMExecutor(
+            model=AzureChatOpenAI(
+                deployment_name="gpt-35-turbo"
+            )
+        )
+
     def create_prompt(self,
                       table: str,
-                      columns: str,
+                      columns: list[str],
                       where_condition: str = None,
                       join_condition: str = None) -> str:
         
-        prompt = f"Give me the {columns} of the {table}"
+        prompt = f"Give me the {', '.join(columns)} of the {table}"
 
         if where_condition:
             prompt += f" where {where_condition}"
@@ -22,9 +30,9 @@ class Executor:
     
     def execute_prompt(self, 
                        prompt: str, 
-                       columns: list[str],
-                       model_executor: LLMExecutor):
-        clean_result = model_executor.invoke(prompt, columns)
+                       columns: list[str]):
+        
+        clean_result = self.model.invoke(prompt, columns)
 
         try:
             df = mdpd.from_md(clean_result)
@@ -52,11 +60,15 @@ class Executor:
                     else:
                         assignments[assignment] = column_to_assign
 
-        new_df = pd.DataFrame()
+            new_df = pd.DataFrame()
 
-        df = df.loc[:, ~df.columns.duplicated()]
+            df = df.loc[:, ~df.columns.duplicated()]
+            
+            for column in assignments:
+                new_df.insert(len(new_df.columns), column, df[assignments[column]])
 
-        for column in assignments:
-            new_df.insert(len(new_df.columns), column, df[assignments[column]])
+            df = new_df
+        else:
+            pass
 
         return df
