@@ -23,8 +23,10 @@ execution_planer.create_exeuction_plans()
 executor = Executor()
 
 plan = execution_planer.execution_plans[1]
-for i, plan in enumerate(execution_planer.execution_plans):
-    print(f'EJECUTANDO PLAN {i+1}')
+# for i, plan in enumerate(execution_planer.execution_plans):
+#     print(f'EJECUTANDO PLAN {i+1}')
   
-    plan.execute(executor)
-    print('----------------')
+#     plan.execute(executor)
+#     print('----------------')
+
+plan.execute(executor)

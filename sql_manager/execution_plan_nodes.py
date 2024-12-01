@@ -60,10 +60,14 @@ class Select(Node):
         print(f'{tab_character*deep}End select')
     
     def execute(self, executor: Executor):
-        print('Select')
         self.table.execute(executor)
         self.result = self.table.result
 
+        columns_names = [column.this.this for column in self.columns]
+        
+        if len(self.result) > 0:
+            self.result = self.result[columns_names]
+        
         print(self.result)
 
 class Table(Node):
