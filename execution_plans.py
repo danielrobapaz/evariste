@@ -1,12 +1,13 @@
 from sql_manager.execution_planner import SQLExecutionPlanner
 from sql_manager.executor import Executor
+
 sql = """
                     SELECT 
 	                    athlete.name,
 	                    sponsorOfAthletes.nameOfSponsor
                     FROM olympicsGame as olympicsGame
                     JOIN olympicsGameCountry as olympicsGameCountry
-                        ON olympicsGameCountry.OlympicGameName = olympicsGame.name
+                        ON olympicsGameCountry.OlympicGameName = olympicsGame.olympicGameName
                     JOIN athlete as athlete
 	                    ON athlete.country = olympicsGameCountry.contryName
                     JOIN sponsorOfAthletes as sponsorOfAthletes
@@ -19,6 +20,11 @@ sql = """
 
 execution_planer = SQLExecutionPlanner(sql)
 execution_planer.create_exeuction_plans()
+executor = Executor()
 
-plan = execution_planer.execution_plans[0]
-plan.execute(Executor())
+plan = execution_planer.execution_plans[1]
+for i, plan in enumerate(execution_planer.execution_plans):
+    print(f'EJECUTANDO PLAN {i+1}')
+  
+    plan.execute(executor)
+    print('----------------')

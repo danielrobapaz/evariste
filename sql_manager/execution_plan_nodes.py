@@ -36,7 +36,7 @@ class Node:
     def get_dependency_aliases(self):
         raise NotImplementedError()
     
-    def show_execution_plan(self, deep: int):
+    def show_execution_plan(self, deep: int = 0):
         raise NotImplementedError()
     
     def execute(self, executor: Executor):
@@ -53,7 +53,7 @@ class Select(Node):
         self.columns: list[Expression] = columns
         self.table: Node = table
 
-    def show_execution_plan(self, deep: int):
+    def show_execution_plan(self, deep: int = 0):
         print(f'{tab_character*deep}Select')
         print(f'{tab_character*deep}Columns: {self.columns}')
         self.table.show_execution_plan(deep+1)
@@ -63,6 +63,8 @@ class Select(Node):
         print('Select')
         self.table.execute(executor)
         self.result = self.table.result
+
+        print(self.result)
 
 class Table(Node):
     def __init__(self, 
@@ -118,14 +120,15 @@ class Table(Node):
         self.result = executor.execute_prompt(prompt, columns)
         
         print(prompt)
-        print(self.result)
         print('\n')
+    
     def get_dependency_aliases(self) -> list[str]:
         return [self.table_alias]
 
-    def show_execution_plan(self, deep: int):
+    def show_execution_plan(self, deep: int = 0):
         print(f'{tab_character*deep}Table')
         print(f'{tab_character*deep}Name:   {self.table_alias}')
+        print(f'{tab_character*deep}Columns:   {self.columns}')
         print(f'{tab_character*deep}Where: {self.where_condition}')
         print(f'{tab_character*deep}End Table')        
 
@@ -139,7 +142,7 @@ class Join(Node):
         self.table2: Table = table2
         self.join_condition: str = join_condition
 
-    def show_execution_plan(self, deep: int):
+    def show_execution_plan(self, deep: int = 0):
         print(f"{tab_character*deep}Join")
         self.table1.show_execution_plan(deep+1)
         self.table2.show_execution_plan(deep+1)
@@ -156,14 +159,27 @@ class Join(Node):
         right_column = self.join_condition.args.get("expression").this
 
         if len(self.table1.result) > 0:
-            foreign_values = self.table1.result[left_column].to_list()
+            foreign_values = self.table1.result[left_column].unique()
 
             translate_join += f" where {right_column} in ({', '.join(foreign_values)})"
 
         return None if translate_join == "" else translate_join
     
+    def __join_result(self):
+        merged_result = pd.DataFrame()
+
+        if len(self.table1.result) > 0 and len(self.table2.result) > 0:
+            merged_result = pd.merge(
+                self.table1.result,
+                self.table2.result,
+                left_on=self.join_condition.this.this.this,
+                right_on=self.join_condition.args.get("expression").this.this,
+                how='inner')
+
+        self.result = merged_result
+
     def execute(self, executor: Executor):
         self.table1.execute(executor)
         join_condition = self.__translate_join_condition()
         self.table2.execute(executor, join_condition)
-        self.result = self.table2.result
+        self.__join_result()
