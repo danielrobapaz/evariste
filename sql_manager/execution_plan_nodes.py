@@ -29,6 +29,7 @@ class Node:
     def __init__(self, type: NodeType):
         self.type: NodeType = type
         self.result: pd.DataFrame = pd.DataFrame()
+        self.estimation: int = -1
 
     def execute(self):
         raise NotImplementedError()
@@ -41,6 +42,32 @@ class Node:
     
     def execute(self, executor: Executor):
         raise NotImplementedError()
+
+    def __cardinality_estimation(self, executor: Executor):
+        raise NotImplementedError()
+
+    def __index_estimation(self, executor: Executor):
+        raise NotImplementedError()
+
+    def __sample_estimation(self, executor: Executor):
+        raise NotImplementedError()
+
+    def estimate(self, type: str, executor: Executor):
+        match type:
+            case 'cardinality':
+                executor.estimation_mode = 'cardinality'
+                return self.__cardinality_estimation(executor)
+
+            case 'index':
+                executor.estimation_mode = 'index'
+                return self.__index_estimation(executor)
+
+            case 'sample':
+                executor.estimation_mode = 'sample'
+                return self.__sample_estimation(executor)
+
+            case _:
+                raise Exception(f'Unknown estimation type: {type}')
 
     def __str__(self) -> str:
         return str(self.__dict__)
@@ -59,6 +86,18 @@ class Select(Node):
         self.table.show_execution_plan(deep+1)
         print(f'{tab_character*deep}End select')
     
+    def __cardinality_estimation(self, executor: Executor):
+        self.table.__cardinality_estimation(executor)
+        self.estimation = self.table.estimation
+
+    def __index_estimation(self, executor: Executor):
+        self.table.__index_estimation(executor)
+        self.estimation = self.table.estimation
+
+    def __sample_estimation(self, executor: Executor):
+        self.table.__sample_estimation(executor)
+        self.estimation = self.table.estimation
+
     def execute(self, executor: Executor):
         self.table.execute(executor)
         self.result = self.table.result
@@ -81,6 +120,15 @@ class Table(Node):
         self.table_alias: str = table_alias
         self.where_condition: list[Expression] = where_condition
         self.columns: list[Expression] = columns
+    
+    def __cardinality_estimation(self, executor: Executor):
+        prompt = executor.create_estimation_prompt(self.table_alias)
+
+    def __index_estimation(self, executor: Executor):
+        prompt = executor.create_estimation_prompt(self.table_alias)
+
+    def __sample_estimation(self, executor: Executor):
+        prompt = executor.create_estimation_prompt(self.table_alias)
     
     def __translate_columns(self) -> list[str]:
         columns: str = set()
@@ -181,6 +229,15 @@ class Join(Node):
                 how='inner')
 
         self.result = merged_result
+
+    def __cardinality_estimation(self, executor: Executor):
+        prompt = executor.create_estimation_prompt(self.table1.table_alias)
+
+    def __index_estimation(self, executor: Executor):
+        prompt = executor.create_estimation_prompt(self.table1.table_alias)
+
+    def __sample_estimation(self, executor: Executor):
+        prompt = executor.create_estimation_prompt(self.table1.table_alias)
 
     def execute(self, executor: Executor):
         self.table1.execute(executor)

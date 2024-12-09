@@ -11,7 +11,31 @@ class Executor:
                 deployment_name="gpt-35-turbo"
             )
         )
+        self.estimation_mode: str = None
 
+    def __cardinality_estimation_prompt(self, table: str) -> str:
+        return f'What is the cardinality of the table {table}'
+    
+    def __index_estimation_prompt(self, table: str) -> str:
+        return f'What is the index of the table {table}'
+    
+    def __sample_estimation_prompt(self, table: str) -> str:
+        return f'What is the sample of the table {table}'
+    
+    def create_estimation_prompt(self, table: str):
+        match self.estimation_mode:
+            case 'cardinality':
+                return self.__cardinality_estimation_prompt(table)
+
+            case 'index':
+                return self.__index_estimation_prompt(table)
+
+            case 'sample':
+                return self.__sample_estimation_prompt(table)
+
+            case _:
+                raise Exception(f'Unknown estimation mode: {self.estimation_mode}')
+            
     def create_prompt(self,
                       table: str,
                       columns: list[str],
