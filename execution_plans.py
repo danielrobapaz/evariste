@@ -1,5 +1,6 @@
 from sql_manager.execution_planner import SQLExecutionPlanner
 from sql_manager.executor import Executor
+from sql_manager.execution_plan_nodes import Node
 
 sql = """
                     SELECT 
@@ -22,11 +23,11 @@ execution_planer = SQLExecutionPlanner(sql)
 execution_planer.create_exeuction_plans()
 executor = Executor()
 
-plan = execution_planer.execution_plans[1]
+plan: Node = execution_planer.execution_plans[1]
 # for i, plan in enumerate(execution_planer.execution_plans):
 #     print(f'EJECUTANDO PLAN {i+1}')
   
 #     plan.execute(executor)
 #     print('----------------')
 
-plan.execute(executor)
+plan.estimate('sample', executor)

@@ -35,7 +35,10 @@ class Executor:
 
             case _:
                 raise Exception(f'Unknown estimation mode: {self.estimation_mode}')
-            
+    
+    def execute_estimation_prompt(self, prompt: str) -> int | pd.DataFrame:
+        raise NotImplementedError()
+    
     def create_prompt(self,
                       table: str,
                       columns: list[str],
@@ -54,7 +57,7 @@ class Executor:
     
     def execute_prompt(self, 
                        prompt: str, 
-                       columns: list[str]):
+                       columns: list[str]) -> pd.DataFrame:
         
         clean_result = self.model.invoke(prompt, columns)
 

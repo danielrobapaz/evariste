@@ -30,9 +30,6 @@ class Node:
         self.type: NodeType = type
         self.result: pd.DataFrame = pd.DataFrame()
         self.estimation: int = -1
-
-    def execute(self):
-        raise NotImplementedError()
     
     def get_dependency_aliases(self):
         raise NotImplementedError()
@@ -53,21 +50,7 @@ class Node:
         raise NotImplementedError()
 
     def estimate(self, type: str, executor: Executor):
-        match type:
-            case 'cardinality':
-                executor.estimation_mode = 'cardinality'
-                return self.__cardinality_estimation(executor)
-
-            case 'index':
-                executor.estimation_mode = 'index'
-                return self.__index_estimation(executor)
-
-            case 'sample':
-                executor.estimation_mode = 'sample'
-                return self.__sample_estimation(executor)
-
-            case _:
-                raise Exception(f'Unknown estimation type: {type}')
+        raise NotImplementedError()
 
     def __str__(self) -> str:
         return str(self.__dict__)
@@ -86,16 +69,9 @@ class Select(Node):
         self.table.show_execution_plan(deep+1)
         print(f'{tab_character*deep}End select')
     
-    def __cardinality_estimation(self, executor: Executor):
-        self.table.__cardinality_estimation(executor)
-        self.estimation = self.table.estimation
-
-    def __index_estimation(self, executor: Executor):
-        self.table.__index_estimation(executor)
-        self.estimation = self.table.estimation
-
-    def __sample_estimation(self, executor: Executor):
-        self.table.__sample_estimation(executor)
+    def estimate(self, type: str, executor: Executor):
+        executor.estimation_mode = type
+        self.table.estimate(type, executor)
         self.estimation = self.table.estimation
 
     def execute(self, executor: Executor):
@@ -126,10 +102,25 @@ class Table(Node):
 
     def __index_estimation(self, executor: Executor):
         prompt = executor.create_estimation_prompt(self.table_alias)
-
+    
     def __sample_estimation(self, executor: Executor):
         prompt = executor.create_estimation_prompt(self.table_alias)
+        print(prompt)
     
+    def estimate(self, type, executor):
+        match type:
+            case 'cardinality':
+                self.__cardinality_estimation(executor)
+            
+            case 'index':
+                self.__index_estimation(executor)
+            
+            case 'sample':
+                self.__sample_estimation(executor)
+            
+            case _:
+                raise Exception(f'Unknown estimation type: {type}')
+
     def __translate_columns(self) -> list[str]:
         columns: str = set()
 
@@ -230,14 +221,9 @@ class Join(Node):
 
         self.result = merged_result
 
-    def __cardinality_estimation(self, executor: Executor):
-        prompt = executor.create_estimation_prompt(self.table1.table_alias)
-
-    def __index_estimation(self, executor: Executor):
-        prompt = executor.create_estimation_prompt(self.table1.table_alias)
-
-    def __sample_estimation(self, executor: Executor):
-        prompt = executor.create_estimation_prompt(self.table1.table_alias)
+    def estimate(self, type, executor):
+        self.table1.estimate(type, executor)
+        self.table2.estimate(type, executor)
 
     def execute(self, executor: Executor):
         self.table1.execute(executor)
