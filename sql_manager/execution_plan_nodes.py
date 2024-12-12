@@ -2,6 +2,7 @@ from enum import Enum
 from sqlglot import Expression
 from sql_manager.executor import Executor
 import pandas as pd
+from dataclasses import dataclass
 
 class NodeType(Enum):
     SELECT = 'SELECT'
@@ -23,13 +24,20 @@ OPERATORS = {
     'lte': 'is less than or equal to'
 }
 
+
 tab_character = '\t'
+
+@dataclass
+class Estimation:
+    cardinality = 0
+    reduction_factor = 1
+    number_of_keys_join = 0
 
 class Node:
     def __init__(self, type: NodeType):
         self.type: NodeType = type
         self.result: pd.DataFrame = pd.DataFrame()
-        self.estimation: int = -1
+        self.estimation: Estimation = Estimation()
     
     def get_dependency_aliases(self):
         raise NotImplementedError()
@@ -40,16 +48,11 @@ class Node:
     def execute(self, executor: Executor):
         raise NotImplementedError()
 
-    def __cardinality_estimation(self, executor: Executor):
-        raise NotImplementedError()
-
-    def __index_estimation(self, executor: Executor):
-        raise NotImplementedError()
-
-    def __sample_estimation(self, executor: Executor):
-        raise NotImplementedError()
-
-    def estimate(self, type: str, executor: Executor):
+    def estimate(
+            self, 
+            type: str, 
+            executor: Executor, 
+            use_static_data: bool = False):
         raise NotImplementedError()
 
     def __str__(self) -> str:
@@ -69,9 +72,12 @@ class Select(Node):
         self.table.show_execution_plan(deep+1)
         print(f'{tab_character*deep}End select')
     
-    def estimate(self, type: str, executor: Executor):
+    def estimate(self, type: str, executor: Executor, use_static_data: bool = False):
+        if type == 'sample' and use_static_data:
+            raise Exception('Sample estimation does not support static data')
+        
         executor.estimation_mode = type
-        self.table.estimate(type, executor)
+        self.table.estimate(type, executor, use_static_data)
         self.estimation = self.table.estimation
 
     def execute(self, executor: Executor):
@@ -97,23 +103,20 @@ class Table(Node):
         self.where_condition: list[Expression] = where_condition
         self.columns: list[Expression] = columns
     
-    def __cardinality_estimation(self, executor: Executor):
-        prompt = executor.create_estimation_prompt(self.table_alias)
+    def __cardinality_estimation(self, executor: Executor, use_static_data: bool = False):
+        table_cardinality, reduction_factor = executor.create_estimation_prompt(self.table_alias, use_static_data)
 
-    def __index_estimation(self, executor: Executor):
-        prompt = executor.create_estimation_prompt(self.table_alias)
-    
+        self.estimation.cardinality = table_cardinality
+        self.estimation.reduction_factor = reduction_factor
+        self.estimation.estimated_cardinality = table_cardinality * reduction_factor
+        
     def __sample_estimation(self, executor: Executor):
-        prompt = executor.create_estimation_prompt(self.table_alias)
-        print(prompt)
+        raise NotImplementedError()
     
-    def estimate(self, type, executor):
+    def estimate(self, type, executor, use_static_data: bool = False):
         match type:
             case 'cardinality':
-                self.__cardinality_estimation(executor)
-            
-            case 'index':
-                self.__index_estimation(executor)
+                self.__cardinality_estimation(executor, use_static_data)
             
             case 'sample':
                 self.__sample_estimation(executor)
@@ -220,10 +223,34 @@ class Join(Node):
                 how='inner')
 
         self.result = merged_result
+    
+    def __get_number_of_keys(self, executor: Executor, use_static_data: bool = False):
+        left_table = self.join_condition.this.table
+        left_column = self.join_condition.this.this.this
 
-    def estimate(self, type, executor):
-        self.table1.estimate(type, executor)
-        self.table2.estimate(type, executor)
+        right_table = self.join_condition.args.get("expression").table
+        right_column = self.join_condition.args.get("expression").this.this
+
+
+        return executor.get_number_of_keys(left_table, left_column, right_table, right_column, use_static_data)
+
+    def estimate(self, type, executor, use_static_data: bool = False):
+        self.table1.estimate(type, executor, use_static_data)
+        self.table2.estimate(type, executor, use_static_data)
+
+        number_of_keys_left_side, number_of_keys_right_side = self.__get_number_of_keys(executor, use_static_data)
+        
+        result_size_left_side = self.table1.estimation.estimated_cardinality
+        result_size_right_side = self.table2.estimation.estimated_cardinality
+
+        self.estimation.cardinality = result_size_left_side * result_size_right_side
+        self.estimation.reduction_factor = 1/max(number_of_keys_left_side, number_of_keys_right_side)
+        self.estimation.estimated_cardinality = self.estimation.cardinality * self.estimation.cardinality
+
+        print(self.join_condition)
+        print(number_of_keys_left_side, number_of_keys_right_side)
+        print(self.estimation.__dict__)
+        
 
     def execute(self, executor: Executor):
         self.table1.execute(executor)

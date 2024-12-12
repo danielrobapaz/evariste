@@ -3,32 +3,85 @@ import pandas as pd
 import mdpd
 import jellyfish
 from langchain_openai import AzureChatOpenAI
+import json
 
 class Executor:
     def __init__(self) -> None:
-        self.model: LLMExecutor = LLMExecutor(
-            model=AzureChatOpenAI(
-                deployment_name="gpt-35-turbo"
-            )
-        )
+        # self.model: LLMExecutor = LLMExecutor(
+        #     model=AzureChatOpenAI(
+        #         deployment_name="gpt-35-turbo"
+        #     )
+        # )
+        self.estimation_file = self.__read_static_data()
         self.estimation_mode: str = None
 
-    def __cardinality_estimation_prompt(self, table: str) -> str:
-        return f'What is the cardinality of the table {table}'
-    
-    def __index_estimation_prompt(self, table: str) -> str:
-        return f'What is the index of the table {table}'
-    
+    def __read_static_data(self) -> dict:
+        with open('sql_manager/estimation.json', 'r') as file:
+            return json.load(file)
+        
+    def __cardinality_estimation_prompt(
+        self, 
+        table: str,
+        use_static_data: bool = False) -> str:
+        table_cardinality = 0
+        where_reduction_factor = 1
+        
+        if use_static_data:
+            table_data = self.estimation_file.get(table, None)
+
+            if not table_data:
+                raise Exception(f'Table {table} not found in the estimation file')
+            
+            table_cardinality = table_data.get('cardinality', table_cardinality)
+            where_reduction_factor = table_data.get('where_reduction_factor', where_reduction_factor)
+        
+        else:
+            raise NotImplementedError()
+        
+        return table_cardinality, where_reduction_factor
+        
     def __sample_estimation_prompt(self, table: str) -> str:
         return f'What is the sample of the table {table}'
     
-    def create_estimation_prompt(self, table: str):
+    def get_number_of_keys(
+        self,
+        left_table: str,
+        left_column: str,
+        right_table: str,
+        right_column: str,
+        use_static_data: bool = False) -> tuple[int, int]:
+        
+        number_of_keys_left = 1
+        number_of_keys_right = 1
+
+        if use_static_data:
+            left_table_data = self.estimation_file.get(left_table, None)
+            right_table_data = self.estimation_file.get(right_table, None)
+            
+            if not left_table_data:
+                raise Exception(f'Table {left_table} not found in the estimation file')
+
+            if not right_table_data:
+                raise Exception(f'Table {right_table} not found in the estimation file')
+            
+            print(left_table)
+            print(left_column)
+            print(left_table_data['join'])
+            number_of_keys_left = left_table_data['join'].get(left_column, number_of_keys_left)
+            number_of_keys_right = right_table_data['join'].get(right_column, number_of_keys_right)
+
+        else:
+            raise NotImplementedError()
+
+        return number_of_keys_left, number_of_keys_right            
+            
+    def create_estimation_prompt(
+            self, 
+            table: str,
+            use_static_data: bool = False) -> str:
         match self.estimation_mode:
             case 'cardinality':
-                return self.__cardinality_estimation_prompt(table)
-
-            case 'index':
-                return self.__index_estimation_prompt(table)
+                return self.__cardinality_estimation_prompt(table, use_static_data)
 
             case 'sample':
                 return self.__sample_estimation_prompt(table)

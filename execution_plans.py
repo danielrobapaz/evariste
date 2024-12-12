@@ -30,4 +30,6 @@ plan: Node = execution_planer.execution_plans[1]
 #     plan.execute(executor)
 #     print('----------------')
 
-plan.estimate('sample', executor)
+table = plan
+executor.estimation_mode = 'cardinality'
+table.estimate('cardinality', executor, True)

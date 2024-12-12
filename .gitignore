@@ -12,3 +12,4 @@ ignorar
 *.txt
 *.faiss
 *.pkl
+*.json
