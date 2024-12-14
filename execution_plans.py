@@ -8,11 +8,11 @@ sql = """
 	                    sponsorOfAthletes.nameOfSponsor
                     FROM olympicsGame as olympicsGame
                     JOIN olympicsGameCountry as olympicsGameCountry
-                        ON olympicsGameCountry.OlympicGameName = olympicsGame.olympicGameName
+                        ON olympicsGameCountry.olympicGameName = olympicsGame.olympicGameName
                     JOIN athlete as athlete
 	                    ON athlete.country = olympicsGameCountry.contryName
                     JOIN sponsorOfAthletes as sponsorOfAthletes
-                        ON sponsorOfAthletes.atheleteName = athlete.name
+                        ON sponsorOfAthletes.athleteName = athlete.name
                     WHERE olympicsGame.season = Summer 
                         AND olympicsGame.year = '2016'
                         AND olympicsGameCountry.goldMedalObtained >= 16

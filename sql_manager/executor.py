@@ -63,10 +63,7 @@ class Executor:
 
             if not right_table_data:
                 raise Exception(f'Table {right_table} not found in the estimation file')
-            
-            print(left_table)
-            print(left_column)
-            print(left_table_data['join'])
+
             number_of_keys_left = left_table_data['join'].get(left_column, number_of_keys_left)
             number_of_keys_right = right_table_data['join'].get(right_column, number_of_keys_right)
 
